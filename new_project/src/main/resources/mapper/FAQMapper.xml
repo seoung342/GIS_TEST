@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.new_project.mapper.FAQMapper">
+    <select id="selectAllAccount" resultType="com.example.new_project.entity.Frequently_Question">
+        SELECT * FROM frequently_asked_question ORDER BY faq_num
+    </select>
+
+</mapper>
