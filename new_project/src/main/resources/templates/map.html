@@ -8,12 +8,18 @@
   <title>GeoServer WMS with OpenLayers</title>
   <link rel="stylesheet" th:href="@{/css/ol.css}"/>
   <script type="text/javascript" th:src="@{/js/ol.js}"></script>
-
 </head>
 <div layout:fragment="content">
   <body>
   <div id="map" style="width: 100%; height: 600px;"></div>
   <div id="map_text"></div>
+
+  <!-- 체크박스 추가 -->
+  <div>
+    <label for="wmsLayerCheckbox">WMS Layer 표시:</label>
+    <input type="checkbox" id="wmsLayerCheckbox" checked>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var extent = [126.9, 37.5, 127.1, 37.6]; // [minLon, minLat, maxLon, maxLat]
@@ -35,7 +41,8 @@
                 'SRS': 'EPSG:4326'  // 좌표계 설정
               },
               serverType: 'geoserver'
-            })
+            }),
+            visible: true  // 기본적으로 WMS 레이어가 보이도록 설정
           })
         ],
         view: new ol.View({
@@ -45,9 +52,16 @@
           extent: extent,  // 지도 이동/확대/축소 가능한 범위 설정
           minZoom: 11, // 최소 줌 레벨 설정
           maxZoom: 14, // 최대 줌 레벨 설정
-
         })
       });
+
+      // 체크박스를 클릭할 때 레이어의 가시성 토글
+      var wmsLayerCheckbox = document.getElementById('wmsLayerCheckbox');
+      wmsLayerCheckbox.addEventListener('change', function() {
+        var wmsLayer = map.getLayers().item(1); // WMS 레이어
+        wmsLayer.setVisible(wmsLayerCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
+      });
+
       // Click event to fetch information
       map.on('click', function (event) {
         var coordinate = event.coordinate;
