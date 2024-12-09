@@ -1,6 +1,5 @@
 package com.example.new_project.controller;
 
-import com.example.new_project.entity.Account;
 import com.example.new_project.entity.User;
 import com.example.new_project.service.AccountService;
 import com.example.new_project.service.UserService;
