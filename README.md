@@ -4,3 +4,5 @@
 4. geoserver에 로그인한다. admin / geoserver
 5. 저장소 -> 새로운 저장소 -> PostGIS 클릭
 6. 작업공간 ne, 데이터 저장소 이름 test, 연결 파라미터는 postgre sql 정보 ( 참고 : https://dev-h2.tistory.com/76 )
+7. 자신이 설치한 geoserver 폴더에 webapps\geoserver\WEB-INF로 간다
+8. web.xml 파일에 있는 jetty cors filter, filter-mapping cross-origin 주석 제거
