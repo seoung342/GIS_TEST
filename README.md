@@ -1,3 +1,4 @@
+postgre sql 부터 GeoServer 까지
 1. postgre sql에 gis 데이터 베이스를 만든다.
 2. test data 폴더 안에 있는 test.shp 파일을 postgre sql에 데이터 베이스를 만들어서 올린다.
 
@@ -14,3 +15,19 @@
 7. 작업공간 ne, 데이터 저장소 이름 test, 연결 파라미터는 postgre sql 정보 ( 참고 : https://dev-h2.tistory.com/76 )
 8. 자신이 설치한 geoserver 폴더에 webapps\geoserver\WEB-INF로 간다
 9. web.xml 파일에 있는 jetty cors filter, filter-mapping cross-origin 주석 제거
+
+   
+레이어 스타일 적용 방법(test_data 폴더에 있는 population.shp, population.sld 사용)
+1. QGIS 사용할 레이어를 벡터 이미지로 띄운다.
+2. 레이어 -> 오른쪽 마우스 클릭 -> 속성 -> 심볼
+3. 스타일 설정을 한다
+4. 왼쪽 아래 스타일 -> 스타일 저장 -> SLD 확장자로 저장
+5. GeoServer에 들어가서 로그인을 한다.
+6. 스타일을 만든 레이어 저장소에 추가하기
+7. 데이터 -> 스타일 -> 새로운 스타일 추가
+8. 이름, 작업공간을 알 수 있는 거로 적는다.
+9. 파일 선택 -> QGIS에서 저장한 SLD 파일을 선택한다.
+10. 유효성 검증에서 문제가 없으면 저장한다.
+11. 레이어 -> 스타일 적용할 레이어 선택
+12. 발행 -> WMS 설정 -> 기본 스타일 -> 내가 저장한 이름을 선택 -> 저장
+13. 레이어 미리보기에서 스타일이 적용 되었나 확인
