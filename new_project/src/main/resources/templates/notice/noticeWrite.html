@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <title>자료실</title>
+    <link rel="stylesheet" th:href="@{/css/notice.css}"/>
+</head>
+<body>
+<div class="container">
+    <h2>자료실 글 등록</h2>
+    <form id="frm" name="frm" method="post" th:action="@{/notice/insertNotice}">
+        <table class="notice_detail">
+            <tr>
+                <td>제목</td>
+                <td><input type="text" id="title" name="title" required oninput="validateTitle(this)"/></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <textarea id="contents" name="contents" required oninput="validateContent(this)"></textarea>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" id="submit" value="저장" class="btn">
+    </form>
+</div>
+<script th:src="@{/js/validate.js}"></script>
+</body>
+</div>
+</html>

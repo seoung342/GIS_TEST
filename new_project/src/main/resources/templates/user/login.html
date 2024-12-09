@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" th:href="@{/css/login.css}"><!-- 절대 경로 -->
+	<title>로그인</title>
+</head>
+<body>
+<div class="login-container">
+	<h2>Login</h2>
+	<form th:action="@{/user/login_process}" method="post">
+		<input type="hidden" name="action" value="login">
+		<label for="id">ID</label>
+		<input type="text" id="id" name="id" placeholder="ID" required>
+
+		<label for="pass">Password</label>
+		<input type="password" id="pass" name="pass" placeholder="Password" required>
+		<div class="errorText" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+		<button type="submit">Login</button>
+		<a class="register-button" th:href="@{/user/register}">회원 가입하기</a>
+		<a class="register-button" th:href="@{/}">취소</a>
+	</form>
+</div>
+</body>
+</html>

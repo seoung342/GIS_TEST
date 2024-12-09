@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoServer WMS with OpenLayers</title>
+  <link rel="stylesheet" th:href="@{/css/ol.css}"/>
+  <script type="text/javascript" th:src="@{/js/ol.js}"></script>
+
+</head>
+<div layout:fragment="content">
+  <body>
+  <div id="map" style="width: 100%; height: 600px;"></div>
+  <div id="map_text"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var extent = [126.9, 37.5, 127.1, 37.6]; // [minLon, minLat, maxLon, maxLat]
+
+      // OpenLayers Map 객체 생성
+      var map = new ol.Map({
+        target: 'map', // map div에 지도 표시
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()  // OpenStreetMap 배경 지도
+          }),
+          new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+              url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+              params: {
+                'LAYERS': 'ne:test',  // 사용하려는 레이어 이름
+                'TILED': true,
+                'FORMAT': 'image/png',
+                'SRS': 'EPSG:4326'  // 좌표계 설정
+              },
+              serverType: 'geoserver'
+            })
+          })
+        ],
+        view: new ol.View({
+          projection: 'EPSG:4326',  // 지도 좌표계 설정
+          center: [126.978, 37.566],  // 서울의 경도, 위도 좌표
+          zoom: 11,  // 기본 줌 레벨
+          extent: extent,  // 지도 이동/확대/축소 가능한 범위 설정
+          minZoom: 11, // 최소 줌 레벨 설정
+          maxZoom: 14, // 최대 줌 레벨 설정
+
+        })
+      });
+      // Click event to fetch information
+      map.on('click', function (event) {
+        var coordinate = event.coordinate;
+        var view = map.getView();
+        var resolution = view.getResolution();
+        var projection = view.getProjection();
+        var url = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
+          'INFO_FORMAT': 'application/json'
+        });
+        // fetch를 사용해 JSON 데이터를 비동기적으로 가져오기
+        if (url) {
+          fetch(url)
+                  .then(response => response.json())  // JSON 응답을 처리
+                  .then(data => {
+                    const name = data.features[0].properties.name;
+                    console.log(name);
+                    let text = document.getElementById("map_text");
+                    text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
+                  })
+                  .catch(error => console.error('Error fetching feature info:', error));
+        }
+      });
+    });
+  </script>
+
+  </body>
+</div>
+</html>
