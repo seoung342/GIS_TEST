@@ -15,8 +15,8 @@
 8. 자신이 설치한 geoserver 폴더에 webapps\geoserver\WEB-INF로 간다
 9. web.xml 파일에 있는 jetty cors filter, filter-mapping cross-origin 주석 제거
 
-
-레이어 스타일 적용 방법
+   
+레이어 스타일 적용 방법(test_data 폴더에 있는 population.shp, population.sld 사용)
 1. QGIS 사용할 레이어를 벡터 이미지로 띄운다.
 2. 레이어 -> 오른쪽 마우스 클릭 -> 속성 -> 심볼
 3. 스타일 설정을 한다
