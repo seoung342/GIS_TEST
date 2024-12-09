@@ -13,6 +13,7 @@
   <body>
   <div id="map" style="width: 100%; height: 600px;"></div>
   <div id="map_text"></div>
+  <div id="population_text"></div>
 
   <!-- 체크박스 추가 -->
   <div>
@@ -89,20 +90,42 @@
         var view = map.getView();
         var resolution = view.getResolution();
         var projection = view.getProjection();
-        var url = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
+        var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
+          'INFO_FORMAT': 'application/json'
+        });
+        var url2 = map.getLayers().item(2).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
           'INFO_FORMAT': 'application/json'
         });
         // fetch를 사용해 JSON 데이터를 비동기적으로 가져오기
-        if (url) {
-          fetch(url)
+        if (url1) {
+          fetch(url1)
                   .then(response => response.json())  // JSON 응답을 처리
                   .then(data => {
                     const name = data.features[0].properties.name;
-                    console.log(name);
                     let text = document.getElementById("map_text");
                     text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
                   })
                   .catch(error => console.error('Error fetching feature info:', error));
+        }
+        if (url2) {
+          fetch(url2)
+                  .then(response => response.json())  // JSON 응답을 처리
+                  .then(data => {
+                    // 데이터가 없거나, features[0]이 없으면 오류 처리
+                    if (data.features && data.features[0] && data.features[0].properties && data.features[0].properties.val) {
+                      const val = data.features[0].properties.val;
+                      let text = document.getElementById("population_text");
+                      text.textContent = '현재 클릭한 곳의 거주 인원는 약 ' + val + '명 입니다.';
+                    } else {
+                      let text = document.getElementById("population_text");
+                      text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';  // 값이 없을 경우 메시지 출력
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error fetching feature info:', error);
+                    let text = document.getElementById("population_text");
+                    text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';  // 에러 발생 시 메시지 출력
+                  });
         }
       });
     });
