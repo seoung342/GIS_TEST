@@ -37,7 +37,7 @@
           }),
           new ol.layer.Tile({
             source: new ol.source.TileWMS({
-              url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+              url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL 자기 설정으로 수정
               params: {
                 'LAYERS': 'ne:test',  // 사용하려는 레이어 이름
                 'TILED': true,
@@ -130,7 +130,6 @@
       });
     });
   </script>
-
   </body>
 </div>
 </html>
