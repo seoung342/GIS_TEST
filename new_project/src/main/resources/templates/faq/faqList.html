@@ -6,28 +6,44 @@
 <head>
     <meta charset="UTF-8">
     <title>자료실</title>
-    <link rel="stylesheet" th:href="@{/css/faq.css}"/>
+    <link rel="stylesheet" th:href="@{/css/faqList.css}"/>
     <script th:src="@{/js/jquery-3.6.0.min.js}"></script> <!-- jquery 사용하기 위해서 필요 -->
 </head>
 <body>
 <div class="container1">
-    <th:block th:each="faq : ${faq}">
+    <th:block th:each="item : ${faq}">
     <table>
         <thead>
         <tr>
             <th style="padding : 0">
-                <button type="button" class="data-button" th:id="'toggleBtn-' + ${faq_num}" th:text="${question}"></button>
+                <button type="button" class="data-button" th:id="${item.getFaq_num()}" th:text="${item.getQuestion()}"></button>
             </th>
         </tr>
         </thead>
-        <tbody class="tbody" th:data-num="${faq_num}" style="display: none;">
+        <tbody class="tbody" th:data-num="${item.getFaq_num()}" style="display: none;">
             <tr>
-                <td th:text="${answer}"></td>
+                <td th:text="${item.getAnswer()}"></td>
             </tr>
         </tbody>
     </table>
     </th:block>
 </div>
+<script>
+    document.querySelectorAll('.data-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var faq_num = button.id.trim();
+            var tbody = document.querySelector('.tbody[data-num="' + faq_num + '"]');
+
+            if (tbody) {
+                if (tbody.style.display === "none") {
+                    tbody.style.display = "block"; // Show the answer
+                } else {
+                    tbody.style.display = "none"; // Hide the answer
+                }
+            }
+        });
+    });
+</script>
 </body>
 </div>
 </html>
