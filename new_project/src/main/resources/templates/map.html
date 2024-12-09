@@ -17,12 +17,15 @@
   <!-- 체크박스 추가 -->
   <div>
     <label for="wmsLayerCheckbox">WMS Layer 표시:</label>
-    <input type="checkbox" id="wmsLayerCheckbox" checked>
+    <input type="checkbox" id="wmsLayerCheckbox">
+  </div>
+  <div>
+    <label for="populationCheckbox">인구 표시:</label>
+    <input type="checkbox" id="populationCheckbox">
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var extent = [126.9, 37.5, 127.1, 37.6]; // [minLon, minLat, maxLon, maxLat]
 
       // OpenLayers Map 객체 생성
       var map = new ol.Map({
@@ -42,20 +45,38 @@
               },
               serverType: 'geoserver'
             }),
-            visible: true  // 기본적으로 WMS 레이어가 보이도록 설정
+            visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+          }),
+          new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+              url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+              params: {
+                'LAYERS': 'ne:population',  // 사용하려는 레이어 이름
+                'TILED': true,
+                'FORMAT': 'image/png',
+                'SRS': 'EPSG:4326'  // 좌표계 설정
+              },
+              serverType: 'geoserver'
+            }),
+            visible: false,  // 기본적으로 인구 레이어가 보이지 않도록 설정
+            opacity: 0.5  // 50% 투명도
           })
         ],
         view: new ol.View({
           projection: 'EPSG:4326',  // 지도 좌표계 설정
           center: [126.978, 37.566],  // 서울의 경도, 위도 좌표
           zoom: 11,  // 기본 줌 레벨
-          extent: extent,  // 지도 이동/확대/축소 가능한 범위 설정
-          minZoom: 2, // 최소 줌 레벨 설정
-          maxZoom: 14, // 최대 줌 레벨 설정
+          minZoom: 1, // 최소 줌 레벨 설정
+          maxZoom: 15, // 최대 줌 레벨 설정
         })
       });
 
       // 체크박스를 클릭할 때 레이어의 가시성 토글
+      var populationCheckbox = document.getElementById('populationCheckbox');
+      populationCheckbox.addEventListener('change', function() {
+        var wmsLayer = map.getLayers().item(2); // WMS 레이어
+        wmsLayer.setVisible(populationCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
+      });
       var wmsLayerCheckbox = document.getElementById('wmsLayerCheckbox');
       wmsLayerCheckbox.addEventListener('change', function() {
         var wmsLayer = map.getLayers().item(1); // WMS 레이어

@@ -15,6 +15,7 @@ public class NewProjectApplication {
     Postgre Sql db
 
     문자열 비교할 때 대, 소문자 구분함
+    전부 복사, 붙여넣기
 
     --- 계정 정보
 create table account (
