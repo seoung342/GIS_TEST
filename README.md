@@ -17,6 +17,13 @@ postgre sql 부터 GeoServer 까지
 9. web.xml 파일에 있는 jetty cors filter, filter-mapping cross-origin 주석 제거
 
 ---------------------------------
+postgre sql에 더 편하게 올리는 방법    
+1. PostgreSql에서 데이터 베이스를 만든다.
+2. QGIS 열기 -> 레이어 -> 레이어 추가 -> 새 백터 레이어 -> shp 파일 선택
+3. 탐색기 -> PostgreSQL -> 새 연결 -> 만든 데이터 베이스 연결 정보 입력 -> 확인    
+4. 생긴 데이터베이스 접속 -> 만든 레이어 드래그 -> public 위에 드랍 -> 확인    
+
+---------------------------------
 레이어 스타일 적용 방법(test_data 폴더에 있는 population.shp, population.sld 사용)
 1. QGIS 사용할 레이어를 벡터 이미지로 띄운다.
 2. 레이어 -> 오른쪽 마우스 클릭 -> 속성 -> 심볼
