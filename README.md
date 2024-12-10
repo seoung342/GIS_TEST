@@ -36,3 +36,5 @@ postgre sql 부터 GeoServer 까지
 ps. 궁금한거는 chat gpt 물어보기
 
 ps. Issues에 결과 화면 있음
+
+geoserver-2.26.1, QGIS 3.34.13, Postgre SQL 16.6.1
