@@ -34,12 +34,12 @@ postgre sql 부터 GeoServer 까지
 
 -----------------------------------
 
-AppConfig.java : 외부 API 호출을 사용할때 필요하다.
-WebConfig.java : CORS 설정이 필요하다면 필요하다.
-MyController : map.html 사용하기위해서
-ol.css : 지도에 필요한 css
-ol.js : 지도에 필요한 js
-map.html : 지도 표시
+AppConfig.java : 외부 API 호출을 사용할때 필요하다.    
+WebConfig.java : CORS 설정이 필요하다면 필요하다.    
+MyController : map.html 사용하기위해서    
+ol.css : 지도에 필요한 css    
+ol.js : 지도에 필요한 js    
+map.html : 지도 표시    
 
 -----------------------------------
 
