@@ -15,5 +15,4 @@
         ORDER BY distance
         LIMIT 1;
     </select>
-
 </mapper>

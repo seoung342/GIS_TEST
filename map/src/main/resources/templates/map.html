@@ -157,7 +157,6 @@
       }
     });
 
-
     var subwaySelect = document.getElementById('subwaySelect');
     subwaySelect.addEventListener('change', function() {
       var subwayLayer = map.getLayers().item(4);
@@ -171,16 +170,19 @@
       subwayLayer.setVisible(true);
     });
 
+    // 지도 클릭시
     map.on('click', function (event) {
       var coordinate = event.coordinate;
       var view = map.getView();
       var resolution = view.getResolution();
       var projection = view.getProjection();
 
+      // 클릭한 위치 좌표
       var lonLatText = '클릭한 위치의 좌표: ' + coordinate[0].toFixed(6) + ', ' + coordinate[1].toFixed(6);
       let coordinateText = document.getElementById("map_position");
       coordinateText.textContent = lonLatText;
 
+      // 클릭한 위치에서 직선 거리로 가장 가까운 역 이름, 거리
       const x = coordinate[0].toFixed(6);
       const y = coordinate[1].toFixed(6);
       fetch('/subway', {
@@ -204,14 +206,10 @@
                 console.error('Error fetching subway data:', error);
               });
 
-
+      // 클릭한 위치 이름
       var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
         'INFO_FORMAT': 'application/json'
       });
-      var url2 = map.getLayers().item(2).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
-        'INFO_FORMAT': 'application/json'
-      });
-
       if (url1) {
         fetch(url1)
                 .then(response => response.json())
@@ -222,6 +220,11 @@
                 })
                 .catch(error => console.error('Error fetching feature info:', error));
       }
+
+      // 클릭한 위치 거주 인원
+      var url2 = map.getLayers().item(2).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
+        'INFO_FORMAT': 'application/json'
+      });
       if (url2) {
         fetch(url2)
                 .then(response => response.json())
