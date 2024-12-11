@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.map.mapper.DistanceMapper">
-    <select id="selectNear" parameterType="com.example.map.entity.Position" resultType="com.example.map.entity.Distance">
+    <select id="selectNear" parameterType="com.example.map.dto.Position" resultType="com.example.map.dto.Distance">
         SELECT
             subway as name,
             ST_DistanceSphere(

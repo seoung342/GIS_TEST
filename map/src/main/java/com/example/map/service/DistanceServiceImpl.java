@@ -1,7 +1,7 @@
 package com.example.map.service;
 
-import com.example.map.entity.Distance;
-import com.example.map.entity.Position;
+import com.example.map.dto.Distance;
+import com.example.map.dto.Position;
 import com.example.map.mapper.DistanceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
