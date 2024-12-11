@@ -178,13 +178,13 @@
       var projection = view.getProjection();
 
       // 클릭한 위치 좌표
-      var lonLatText = '클릭한 위치의 좌표: ' + coordinate[0].toFixed(6) + ', ' + coordinate[1].toFixed(6);
+      var lonLatText = '클릭한 위치의 위도 : ' +  coordinate[1].toFixed(6) + ', 경도 : ' + coordinate[0].toFixed(6); // 위도, 경도
       let coordinateText = document.getElementById("map_position");
       coordinateText.textContent = lonLatText;
 
       // 클릭한 위치에서 직선 거리로 가장 가까운 역 이름, 거리
-      const x = coordinate[0].toFixed(6);
-      const y = coordinate[1].toFixed(6);
+      const x = coordinate[0].toFixed(6); // 경도
+      const y = coordinate[1].toFixed(6); // 위도
       fetch('/subway', {
         method: 'POST',
         headers: {
