@@ -148,7 +148,6 @@
 
     // 지하철 범위 체크박스를 클릭할 때, 지하철 범위 선택 드롭다운을 토글
     var subwaySelectContainer = document.getElementById('subwaySelectContainer'); // 드롭다운을 감싸는 div
-
     subwayRangeCheckbox.addEventListener('change', function() {
       if (subwayRangeCheckbox.checked) {
         subwaySelectContainer.style.display = 'block';  // 체크되면 드롭다운 표시
@@ -171,26 +170,32 @@
       subwayLayer.setVisible(true);  // 레이어를 보이도록 설정
     });
 
-    // Click event to fetch information
+    // 지도 클릭 시 정보 가져오기 (Feature Info 요청)
     map.on('click', function (event) {
-      var coordinate = event.coordinate;
+      var coordinate = event.coordinate; // 클릭한 위치의 좌표
       var view = map.getView();
       var resolution = view.getResolution();
       var projection = view.getProjection();
+
+      // 클릭한 위치의 좌표 (longitude, latitude) 출력
+      var lonLatText = '클릭한 위치의 좌표: ' + coordinate[0].toFixed(6) + ', ' + coordinate[1].toFixed(6);
+      let coordinateText = document.getElementById("map_text");
+      coordinateText.textContent = lonLatText;
+
       var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
         'INFO_FORMAT': 'application/json'
       });
       var url2 = map.getLayers().item(2).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
         'INFO_FORMAT': 'application/json'
       });
-      // fetch를 사용해 JSON 데이터를 비동기적으로 가져오기
+
       if (url1) {
         fetch(url1)
                 .then(response => response.json())  // JSON 응답을 처리
                 .then(data => {
                   const name = data.features[0].properties.name;
                   let text = document.getElementById("map_text");
-                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
+                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.' + '\n' + lonLatText; // 좌표 추가
                 })
                 .catch(error => console.error('Error fetching feature info:', error));
       }
@@ -198,20 +203,19 @@
         fetch(url2)
                 .then(response => response.json())  // JSON 응답을 처리
                 .then(data => {
-                  // 데이터가 없거나, features[0]이 없으면 오류 처리
                   if (data.features && data.features[0] && data.features[0].properties && data.features[0].properties.val) {
                     const val = data.features[0].properties.val;
                     let text = document.getElementById("population_text");
                     text.textContent = '현재 클릭한 곳의 거주 인원는 약 ' + val + '명 입니다.';
                   } else {
                     let text = document.getElementById("population_text");
-                    text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';  // 값이 없을 경우 메시지 출력
+                    text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';
                   }
                 })
                 .catch(error => {
                   console.error('Error fetching feature info:', error);
                   let text = document.getElementById("population_text");
-                  text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';  // 에러 발생 시 메시지 출력
+                  text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';
                 });
       }
     });
