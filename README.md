@@ -55,6 +55,73 @@ data 폴더
 스타일 파일은 이름이 같은 이름의 .shp 파일에 적용한다.    
 
 -----------------------------------
+PostGIS 함수 목록   
+1. Geometry 함수 (Geometry Functions)    
+   ST_AsText(geometry): Geometry를 WKT(Well-Known Text)로 변환합니다.    
+   ST_AsBinary(geometry): Geometry를 WKB(Well-Known Binary)로 변환합니다.    
+   ST_GeometryType(geometry): Geometry 객체의 타입을 반환합니다.    
+   ST_Area(geometry): 면적을 계산합니다.    
+   ST_Perimeter(geometry): 경계를 계산합니다.    
+   ST_Length(geometry): 선분의 길이를 계산합니다.    
+   ST_Boundary(geometry): Geometry 객체의 경계를 반환합니다.    
+   ST_Centroid(geometry): Geometry의 중심점을 반환합니다.    
+   ST_ConvexHull(geometry): Geometry의 볼록한 외각을 반환합니다.    
+   ST_Envelope(geometry): Geometry를 포함하는 최소 직사각형(bounding box)을 반환합니다.    
+   ST_Union(geometry, geometry): 두 개 이상의 Geometry 객체를 결합합니다.    
+   ST_Intersection(geometry, geometry): 두 Geometry 객체의 교차 부분을 반환합니다.    
+   ST_Difference(geometry, geometry): 첫 번째 Geometry에서 두 번째 Geometry를 뺀 부분을 반환합니다.    
+   ST_SymDifference(geometry, geometry): 두 Geometry 객체의 대칭 차집합을 반환합니다.    
+   ST_Intersects(geometry, geometry): 두 Geometry가 교차하는지 여부를 반환합니다.    
+   ST_Contains(geometry, geometry): 첫 번째 Geometry가 두 번째 Geometry를 포함하는지 확인합니다.    
+   ST_Within(geometry, geometry): 첫 번째 Geometry가 두 번째 Geometry 내에 있는지 확인합니다.    
+2. Spatial Relationships 함수 (Spatial Relationship Functions)    
+   ST_Equal(geometry, geometry): 두 Geometry가 동일한지 확인합니다.    
+   ST_Touches(geometry, geometry): 두 Geometry가 접하는지 확인합니다.    
+   ST_Crosses(geometry, geometry): 두 Geometry가 교차하는지 확인합니다.    
+   ST_Disjoint(geometry, geometry): 두 Geometry가 겹치지 않는지 확인합니다.    
+   ST_Overlaps(geometry, geometry): 두 Geometry가 겹치는지 확인합니다.    
+   ST_Within(geometry, geometry): 첫 번째 Geometry가 두 번째 Geometry 내에 포함되는지 확인합니다.    
+   ST_Contains(geometry, geometry): 첫 번째 Geometry가 두 번째 Geometry를 포함하는지 확인합니다.    
+   3. Distance 함수 (Distance Functions)    
+   ST_Distance(geometry, geometry): 두 Geometry 간의 최단 거리를 계산합니다.    
+   ST_MaxDistance(geometry, geometry): 두 Geometry 간의 최대 거리를 계산합니다.    
+   ST_ClosestPoint(geometry, geometry): 두 Geometry 간 가장 가까운 점을 반환합니다.    
+   ST_FurthestPoint(geometry, geometry): 두 Geometry 간 가장 먼 점을 반환합니다.    
+4. 위치 및 좌표 함수 (Location & Coordinate Functions)    
+   ST_X(geometry): Geometry 객체의 X 좌표를 반환합니다.    
+   ST_Y(geometry): Geometry 객체의 Y 좌표를 반환합니다.    
+   ST_Z(geometry): Geometry 객체의 Z 좌표를 반환합니다.   
+   ST_Point(geometry): 좌표값을 이용해 포인트 객체를 생성합니다.    
+   ST_SetSRID(geometry, srid): Geometry 객체에 SRID(Spatial Reference System Identifier)를 설정합니다.    
+   ST_SRID(geometry): Geometry 객체의 SRID를 반환합니다.    
+5. 데이터 변환 함수 (Transformation Functions)    
+   ST_Transform(geometry, srid): Geometry를 다른 좌표계(SRID)로 변환합니다.    
+   ST_Translate(geometry, x, y, z): Geometry 객체를 x, y, z 방향으로 이동시킵니다.    
+   ST_Rotate(geometry, angle): Geometry 객체를 주어진 각도로 회전시킵니다.    
+   ST_Scale(geometry, x, y, z): Geometry 객체를 주어진 비율로 확장 또는 축소시킵니다.    
+6. 인덱스 및 성능 함수 (Index & Performance Functions)    
+   ST_ClusterWithin(geometry[], distance): 주어진 거리 내에서 점들을 그룹화합니다.   
+   ST_ClusterDBSCAN(geometry[], eps, minPoints): DBSCAN 알고리즘을 사용하여 공간 클러스터링을 수행합니다.    
+   ST_ContainsProperly(geometry, geometry): 첫 번째 Geometry가 두 번째 Geometry를 제대로 포함하는지 확인합니다.    
+   7. Geography 함수 (Geography Functions)    
+   ST_AsGeography(geometry): Geometry 객체를 Geography 객체로 변환합니다.    
+   ST_GeogFromText(text): WKT를 사용해 Geography 객체를 생성합니다.    
+   ST_Distance(geography, geography): 두 Geography 객체 간의 거리를 계산합니다.    
+   ST_Area(geography): Geography 객체의 면적을 계산합니다.    
+   ST_Length(geography): Geography 객체의 길이를 계산합니다.    
+8. 기타 유용한 함수 (Miscellaneous Functions)    
+   ST_IsValid(geometry): Geometry 객체가 유효한지 확인합니다.    
+   ST_IsSimple(geometry): Geometry 객체가 간단한지 확인합니다.    
+   ST_IsEmpty(geometry): Geometry 객체가 비어있는지 확인합니다.    
+   ST_IsRing(geometry): Geometry가 링(닫힌 경로)인지 확인합니다.    
+   ST_Simplify(geometry, tolerance): Geometry 객체를 단순화하여 복잡도를 줄입니다.    
+   ST_MemSize(geometry): Geometry 객체가 차지하는 메모리 크기를 반환합니다.    
+9. Raster 함수 (Raster Functions)    
+   ST_Clip(raster, geometry): 래스터 데이터를 지정된 Geometry로 자릅니다.    
+   ST_Resample(raster, scaleX, scaleY): 래스터 데이터를 지정된 비율로 리샘플링합니다.    
+   ST_Value(raster, x, y): 특정 x, y 위치에서 래스터의 값을 반환합니다.    
+
+--------------------------------
 
 ps. 궁금한거는 chat gpt 물어보기    
 ps. Issues에 결과 화면 있음    
