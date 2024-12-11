@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.map.mapper.DistanceMapper">
+    <select id="selectNear" parameterType="com.example.map.entity.Position" resultType="com.example.map.entity.Distance">
+        SELECT
+            subway as name,
+            ST_DistanceSphere(
+                    ST_Transform(ST_SetSRID(ST_GeomFromWKB(subway.geom), 5186), 4326),
+                    ST_SetSRID(ST_MakePoint(#{x}, #{y}), 4326))
+                AS distance
+        FROM subway
+        ORDER BY distance
+        LIMIT 1;
+    </select>
+
+</mapper>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +16,8 @@
 <body>
 <div id="map" style="width: 100%; height: 600px;"></div>
 <div id="map_text"></div>
+<div id="subway"></div>
+<div id="map_position"></div>
 <div id="population_text"></div>
 
 <!-- 체크박스 추가 -->
@@ -48,7 +50,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-
     // OpenLayers Map 객체 생성
     var map = new ol.Map({
       target: 'map', // map div에 지도 표시
@@ -156,31 +157,53 @@
       }
     });
 
-    // 지하철 레이어를 선택할 때마다 레이어 변경하는 기능
+
     var subwaySelect = document.getElementById('subwaySelect');
     subwaySelect.addEventListener('change', function() {
-      var subwayLayer = map.getLayers().item(4);  // 지하철 WMS 레이어
-      var selectedLayerOption = subwaySelect.value;  // 선택된 값
+      var subwayLayer = map.getLayers().item(4);
+      var selectedLayerOption = subwaySelect.value;
       console.log(selectedLayerOption)
-      // 선택된 레이어에 따라 파라미터 업데이트
+
       subwayLayer.getSource().updateParams({
-        'LAYERS': selectedLayerOption  // 여기서 레이어를 선택한 값에 맞게 변경
+        'LAYERS': selectedLayerOption
       });
-      subwayLayer.setVisible(false);  // 먼저 레이어를 숨김
-      subwayLayer.setVisible(true);  // 레이어를 보이도록 설정
+      subwayLayer.setVisible(false);
+      subwayLayer.setVisible(true);
     });
 
-    // 지도 클릭 시 정보 가져오기 (Feature Info 요청)
     map.on('click', function (event) {
-      var coordinate = event.coordinate; // 클릭한 위치의 좌표
+      var coordinate = event.coordinate;
       var view = map.getView();
       var resolution = view.getResolution();
       var projection = view.getProjection();
 
-      // 클릭한 위치의 좌표 (longitude, latitude) 출력
       var lonLatText = '클릭한 위치의 좌표: ' + coordinate[0].toFixed(6) + ', ' + coordinate[1].toFixed(6);
-      let coordinateText = document.getElementById("map_text");
+      let coordinateText = document.getElementById("map_position");
       coordinateText.textContent = lonLatText;
+
+      const x = coordinate[0].toFixed(6);
+      const y = coordinate[1].toFixed(6);
+      fetch('/subway', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ x, y })
+      }).then(response => response.json())
+              .then(data => {
+                console.log('서버 응답:', data);
+
+                let subway = document.getElementById("subway");
+                if (data.name && data.distance) {
+                  subway.textContent = `가까운 지하철역: ${data.name}, 거리: ${data.distance}m`;
+                } else {
+                  subway.textContent = "가까운 지하철을 찾을 수 없습니다.";
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching subway data:', error);
+              });
+
 
       var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
         'INFO_FORMAT': 'application/json'
@@ -191,17 +214,17 @@
 
       if (url1) {
         fetch(url1)
-                .then(response => response.json())  // JSON 응답을 처리
+                .then(response => response.json())
                 .then(data => {
                   const name = data.features[0].properties.name;
                   let text = document.getElementById("map_text");
-                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.' + '\n' + lonLatText; // 좌표 추가
+                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
                 })
                 .catch(error => console.error('Error fetching feature info:', error));
       }
       if (url2) {
         fetch(url2)
-                .then(response => response.json())  // JSON 응답을 처리
+                .then(response => response.json())
                 .then(data => {
                   if (data.features && data.features[0] && data.features[0].properties && data.features[0].properties.val) {
                     const val = data.features[0].properties.val;
