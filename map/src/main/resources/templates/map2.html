@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoServer WMS with OpenLayers</title>
+  <link rel="stylesheet" th:href="@{/css/ol.css}"/>
+  <script type="text/javascript" th:src="@{/js/ol.js}"></script>
+</head>
+<body>
+<div id="map" style="width: 100%; height: 800px;"></div>
+<div id="map_text"></div>
+<div id="subway"></div>
+<div id="map_position"></div>
+<div id="population_text"></div>
+
+<!-- 체크박스 추가 -->
+<div>
+  <label for="wmsLayerCheckbox">WMS Layer 표시:</label>
+  <input type="checkbox" id="wmsLayerCheckbox">
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // OpenLayers Map 객체 생성
+    var map = new ol.Map({
+      target: 'map', // map div에 지도 표시
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()  // OpenStreetMap 배경 지도
+        }), // 0번
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:busan',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 부산
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:chungcheongbuk-do',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }),// 경북
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:chungcheongnam-do',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 경남
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:daegu',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 대구
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:daejeon',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 대전
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:gangwon',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 강원도
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:gwangju',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 광주
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:gyeonggi-do',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 경기도
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:gyeongsangbuk-do',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 경상북도
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:gyeongsangnam-do',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 경상남도
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:incheon',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 인천
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:jeju',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 제주
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:jeollanam-do',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 전남
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:jeonbuk',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 전북
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:ulsan',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 울산
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:seoul',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }), // 서울
+        new ol.layer.Tile({
+          source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
+            params: {
+              'LAYERS': 'ne:sejong-si',  // 사용하려는 레이어 이름
+              'TILED': true,
+              'FORMAT': 'image/png',
+              'SRS': 'EPSG:4326'  // 좌표계 설정
+            },
+            serverType: 'geoserver'
+          }),
+          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
+        }) // 세종시
+      ],
+      view: new ol.View({
+        projection: 'EPSG:4326',  // 지도 좌표계 설정
+        center: [126.978, 37.566],  // 서울의 경도, 위도 좌표
+        zoom: 11,  // 기본 줌 레벨
+        minZoom: 1, // 최소 줌 레벨 설정
+        maxZoom: 20, // 최대 줌 레벨 설정
+      })
+    });
+
+    // 체크박스를 클릭할 때 레이어의 가시성 토글
+    var wmsLayerCheckbox = document.getElementById('wmsLayerCheckbox');
+    wmsLayerCheckbox.addEventListener('change', function() {
+      for (let i = 1; i < 18; i++){ // let을 사용하여 반복 변수 선언
+        var wmsLayer = map.getLayers().item(i); // WMS 레이어
+        wmsLayer.setVisible(wmsLayerCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
+      }
+    });
+
+    // 지도 클릭시
+    map.on('click', function (event) {
+      var coordinate = event.coordinate;
+      var view = map.getView();
+      var resolution = view.getResolution();
+      var projection = view.getProjection();
+
+      // 클릭한 위치 좌표
+      var lonLatText = '클릭한 위치의 위도 : ' +  coordinate[1].toFixed(6) + ', 경도 : ' + coordinate[0].toFixed(6); // 위도, 경도
+      let coordinateText = document.getElementById("map_position");
+      coordinateText.textContent = lonLatText;
+
+      // 클릭한 위치 이름
+      var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
+        'INFO_FORMAT': 'application/json'
+      });
+      if (url1) {
+        fetch(url1)
+                .then(response => response.json())
+                .then(data => {
+                  const name = data.features[0].properties.name;
+                  let text = document.getElementById("map_text");
+                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
+                })
+                .catch(error => console.error('Error fetching feature info:', error));
+      }
+    });
+  });
+
+</script>
+</body>
+</html>
