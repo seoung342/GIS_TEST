@@ -1,251 +1,307 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GeoServer WMS with OpenLayers</title>
-  <link rel="stylesheet" th:href="@{/css/ol.css}"/>
-  <script type="text/javascript" th:src="@{/js/ol.js}"></script>
+  <title>VWorld Map with Styles</title>
+  <script type="text/javascript"
+          src="https://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=8A69FB7A-6E07-3B76-B2F2-1D1FEF0E5781"></script>
+  <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+  <script src="https://map.vworld.kr/jquery/ol3/jquery-1.11.3.min.js" async></script>
   <style>
-    /* 드롭다운을 기본적으로 숨김 */
-    #subwaySelectContainer {
-      display: none;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+
+    #sidebar {
+      width: 300px;
+      background-color: #f0f0f0;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    #map-container {
+      flex: 1;
+      position: relative;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    #searchResults {
+      list-style: none;
+      padding: 0;
+      max-height: calc(100% - 220px);
+      overflow-y: auto;
+      margin-top: 10px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    #searchResults li {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #searchResults li:hover {
+      background-color: rgb(173, 252, 226);
+    }
+
+    #searchForm {
+      margin-bottom: 10px;
+    }
+
+    #searchValue {
+      font-size: 16px;
+      width: 250px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .btn {
+      margin-bottom: 5px;
+      padding: 7px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    #res-cnt {
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    strong {
+      font-size: 18px;
+    }
+
+    .overlayElement {
+      background-color: #3399CC;
+      border: 2px solid white;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .overlayElement:hover {
+      background-color: #286090;
+    }
+
+    .closeButton {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      line-height: 18px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .closeButton:hover {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .ol-zoom-in, .ol-zoom-out {
+      background-color: rgba(0, 0, 0, 1) !important;
+    }
+
+    .ol-zoom {
+      bottom: 65px !important;
+      left: auto !important;
+      top: auto !important;
+    }
+
+    .ol-zoomslider {
+      background-color: rgba(255, 255, 255, 0.8) !important;
+      border: 1px solid #ccc !important;
+      right: 20px !important;
+      bottom: 40px !important;
+      left: auto !important;
+      top: auto !important;
+    }
+
+    .zoom-level {
+      position: absolute;
+      bottom: 15px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    .scale-line {
+      left: auto !important;
+      top: auto !important;
+      bottom: 10px !important;
+      right: 20px !important;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    .ol-scale-line-inner {
+      font-size: 16px;
     }
   </style>
 </head>
+
 <body>
-<div id="map" style="width: 100%; height: 600px;"></div>
-<div id="map_text"></div>
-<div id="subway"></div>
-<div id="map_position"></div>
-<div id="population_text"></div>
+<div id="sidebar">
+  <form id="searchForm" action="#" class="form_data" onsubmit="return false;">
+    <input type="hidden" name="page" value="1" />
+    <input type="hidden" name="type" value="PLACE" />
+    <input type="hidden" name="size" value="1000" />
+    <input type="hidden" name="request" value="search" />
+    <input type="hidden" name="apiKey" value="${apiKey}" />
 
-<!-- 체크박스 추가 -->
-<div>
-  <label for="wmsLayerCheckbox">WMS Layer 표시:</label>
-  <input type="checkbox" id="wmsLayerCheckbox">
-</div>
-<div>
-  <label for="populationCheckbox">인구 표시:</label>
-  <input type="checkbox" id="populationCheckbox">
-</div>
-<div>
-  <label for="subwayCheckbox">지하철</label>
-  <input type="checkbox" id="subwayCheckbox">
-</div>
-<div>
-  <label for="subwayRangeCheckbox">지하철-범위</label>
-  <input type="checkbox" id="subwayRangeCheckbox">
-</div>
-<div id="subwaySelectContainer">
-  <label for="subwaySelect">지하철 범위 선택:</label>
-  <select id="subwaySelect">
-    <option value="ne:subway_100">100</option>
-    <option value="ne:subway_200">200</option>
-    <option value="ne:subway_300">300</option>
-    <option value="ne:subway_400">400</option>
-    <option value="ne:subway_500">500</option>
-  </select>
+    <div style="display: flexbox; align-items: center;">
+      <input type="text" id="searchValue" name="query" placeholder="여의도" />
+      <button id="searchButton" class="btn" onclick="search();">검색</button>
+      <span> 결과 : </span>
+      <span id="res-cnt"></span>
+    </div>
+  </form>
+
+  <div style="margin-top: 20px;">
+    <button class="btn" onclick="changeMapStyle('base')">2D 배경지도</button>
+    <button class="btn" onclick="changeMapStyle('white')">2D 백지도</button>
+    <button class="btn" onclick="changeMapStyle('night')">2D 야간지도</button>
+    <button class="btn" onclick="changeMapStyle('hybrid')">하이브리드</button>
+    <button class="btn" onclick="changeMapStyle('photo')">위성지도</button>
+    <button class="btn" onclick="changeMapStyle('satelliteHybrid')">위성 하이브리드 지도</button>
+  </div>
+
+  <ul id="searchResults"></ul>
 </div>
 
+<div id="map-container">
+  <div id="map" style="height: 100%;"></div>
+  <div class="zoom-level" id="zoom-level">Zoom: 13</div>
+  <div class="scale-line" id="scale-line"></div>
+</div>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // OpenLayers Map 객체 생성
-    var map = new ol.Map({
-      target: 'map', // map div에 지도 표시
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()  // OpenStreetMap 배경 지도
-        }), // 0번
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL, 자기 설정으로 수정  http://localhost:포트번호/geoserver/저장소/wms
-            params: {
-              'LAYERS': 'ne:test',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }),  //1번
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:population',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false,  // 기본적으로 레이어가 보이지 않도록 설정
-          opacity: 0.8,  // 80% 투명도
-          zIndex: 90
-        }), // 2번 인구 데이터
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:subway',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false,  // 기본적으로 레이어가 보이지 않도록 설정
-          opacity: 1,
-          zIndex: 100
-        }), // 3번 송파구 지하철 위치
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:subway_100',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false,  // 기본적으로 레이어가 보이지 않도록 설정
-          opacity: 0.8,  // 80% 투명도
-          zIndex: 90
-        }) // 4번 지하철 범위
-      ],
-      view: new ol.View({
-        projection: 'EPSG:4326',  // 지도 좌표계 설정
-        center: [126.978, 37.566],  // 서울의 경도, 위도 좌표
-        zoom: 11,  // 기본 줌 레벨
-        minZoom: 1, // 최소 줌 레벨 설정
-        maxZoom: 15, // 최대 줌 레벨 설정
+  const vworldKey = '8A69FB7A-6E07-3B76-B2F2-1D1FEF0E5781';
+
+  let mapStyles = {
+    base: new ol.layer.Tile({
+      title: 'VWorld Base Map',
+      visible: false,
+      source: new ol.source.XYZ({
+        url: `http://api.vworld.kr/req/wmts/1.0.0/${vworldKey}/Base/{z}/{y}/{x}.png`
       })
-    });
+    }),
+    white: new ol.layer.Tile({
+      title: 'VWorld White Map',
+      visible: false,
+      source: new ol.source.XYZ({
+        url: `http://api.vworld.kr/req/wmts/1.0.0/${vworldKey}/white/{z}/{y}/{x}.png`
+      })
+    }),
+    night: new ol.layer.Tile({
+      title: 'VWorld Night Map',
+      visible: false,
+      source: new ol.source.XYZ({
+        url: `http://api.vworld.kr/req/wmts/1.0.0/${vworldKey}/midnight/{z}/{y}/{x}.png`
+      })
+    }),
+    hybrid: new ol.layer.Tile({
+      title: 'VWorld Hybrid Map',
+      visible: true,  // hybrid 지도는 visible을 true로 설정하여 기본으로 보이게 설정
+      source: new ol.source.XYZ({
+        url: `http://api.vworld.kr/req/wmts/1.0.0/${vworldKey}/Hybrid/{z}/{y}/{x}.png`,
+        crossOrigin: 'Anonymous'
+      }),
+    }),
+    photo: new ol.layer.Tile({
+      title: 'VWorld Photo Map',
+      visible: false,
+      source: new ol.source.XYZ({
+        url: `http://api.vworld.kr/req/wmts/1.0.0/${vworldKey}/PHOTO/{z}/{y}/{x}.png`
+      })
+    }),
+    satelliteHybrid: new ol.layer.Tile({
+      title: 'VWorld Satellite Hybrid Map',
+      visible: false,
+      source: new ol.source.XYZ({
+        url: `http://api.vworld.kr/req/wmts/1.1.1/${vworldKey}/Satellite/{z}/{y}/{x}.jpeg`,
+        crossOrigin: 'Anonymous'
+      }),
+      type: 'base'
+    })
+  };
 
-    // 체크박스를 클릭할 때 레이어의 가시성 토글
-    var wmsLayerCheckbox = document.getElementById('wmsLayerCheckbox');
-    wmsLayerCheckbox.addEventListener('change', function() {
-      var wmsLayer = map.getLayers().item(1); // WMS 레이어
-      wmsLayer.setVisible(wmsLayerCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
-    });
-    var populationCheckbox = document.getElementById('populationCheckbox');
-    populationCheckbox.addEventListener('change', function() {
-      var wmsLayer = map.getLayers().item(2); // WMS 레이어
-      wmsLayer.setVisible(populationCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
-    });
-    var subwayCheckbox = document.getElementById('subwayCheckbox');
-    subwayCheckbox.addEventListener('change', function() {
-      var wmsLayer = map.getLayers().item(3); // WMS 레이어
-      wmsLayer.setVisible(subwayCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
-    });
-    var subwayRangeCheckbox = document.getElementById('subwayRangeCheckbox');
-    subwayRangeCheckbox.addEventListener('change', function() {
-      var wmsLayer = map.getLayers().item(4); // WMS 레이어
-      wmsLayer.setVisible(subwayRangeCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
-    });
+  // 기본 지도 스타일을 Hybrid로 설정 (위성 + 벡터 결합된 지도)
+  let currentMapStyle = 'hybrid'; // 기본적으로 Hybrid 지도 활성화
 
-    // 지하철 범위 체크박스를 클릭할 때, 지하철 범위 선택 드롭다운을 토글
-    var subwaySelectContainer = document.getElementById('subwaySelectContainer'); // 드롭다운을 감싸는 div
-    subwayRangeCheckbox.addEventListener('change', function() {
-      if (subwayRangeCheckbox.checked) {
-        subwaySelectContainer.style.display = 'block';  // 체크되면 드롭다운 표시
-      } else {
-        subwaySelectContainer.style.display = 'none';   // 체크 해제되면 드롭다운 숨기기
-      }
-    });
-
-    var subwaySelect = document.getElementById('subwaySelect');
-    subwaySelect.addEventListener('change', function() {
-      var subwayLayer = map.getLayers().item(4);
-      var selectedLayerOption = subwaySelect.value;
-      console.log(selectedLayerOption)
-
-      subwayLayer.getSource().updateParams({
-        'LAYERS': selectedLayerOption
-      });
-      subwayLayer.setVisible(false);
-      subwayLayer.setVisible(true);
-    });
-
-    // 지도 클릭시
-    map.on('click', function (event) {
-      var coordinate = event.coordinate;
-      var view = map.getView();
-      var resolution = view.getResolution();
-      var projection = view.getProjection();
-
-      // 클릭한 위치 좌표
-      var lonLatText = '클릭한 위치의 위도 : ' +  coordinate[1].toFixed(6) + ', 경도 : ' + coordinate[0].toFixed(6); // 위도, 경도
-      let coordinateText = document.getElementById("map_position");
-      coordinateText.textContent = lonLatText;
-
-      // 클릭한 위치에서 직선 거리로 가장 가까운 역 이름, 거리
-      const x = coordinate[0].toFixed(6); // 경도
-      const y = coordinate[1].toFixed(6); // 위도
-      fetch('/subway', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ x, y })
-      }).then(response => response.json())
-              .then(data => {
-                console.log('서버 응답:', data);
-
-                let subway = document.getElementById("subway");
-                if (data.name && data.distance) {
-                  subway.textContent = `가까운 지하철역: ${data.name}, 거리: ${data.distance}m`;
-                } else {
-                  subway.textContent = "가까운 지하철을 찾을 수 없습니다.";
-                }
-              })
-              .catch(error => {
-                console.error('Error fetching subway data:', error);
-              });
-
-      // 클릭한 위치 이름
-      var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
-        'INFO_FORMAT': 'application/json'
-      });
-      if (url1) {
-        fetch(url1)
-                .then(response => response.json())
-                .then(data => {
-                  const name = data.features[0].properties.name;
-                  let text = document.getElementById("map_text");
-                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
-                })
-                .catch(error => console.error('Error fetching feature info:', error));
-      }
-
-      // 클릭한 위치 거주 인원
-      var url2 = map.getLayers().item(2).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
-        'INFO_FORMAT': 'application/json'
-      });
-      if (url2) {
-        fetch(url2)
-                .then(response => response.json())
-                .then(data => {
-                  if (data.features && data.features[0] && data.features[0].properties && data.features[0].properties.val) {
-                    const val = data.features[0].properties.val;
-                    let text = document.getElementById("population_text");
-                    text.textContent = '현재 클릭한 곳의 거주 인원는 약 ' + val + '명 입니다.';
-                  } else {
-                    let text = document.getElementById("population_text");
-                    text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';
-                  }
-                })
-                .catch(error => {
-                  console.error('Error fetching feature info:', error);
-                  let text = document.getElementById("population_text");
-                  text.textContent = '이곳의 거주 인원은 없는 것 같습니다.';
-                });
-      }
-    });
+  const map = new ol.Map({
+    target: 'map',
+    layers: [
+      mapStyles.base,
+      mapStyles.white,
+      mapStyles.night,
+      mapStyles.hybrid,   // 하이브리드 레이어 추가
+      mapStyles.photo,
+      mapStyles.satelliteHybrid // 위성 하이브리드 레이어 추가
+    ],
+    view: new ol.View({
+      center: ol.proj.transform([126.925535, 37.525101], 'EPSG:4326', 'EPSG:3857'),
+      zoom: 13,
+      minZoom: 7, // 최소 줌 레벨
+      maxZoom: 19 // 최대 줌 레벨
+    }),
+    controls: ol.control.defaults().extend([
+      new ol.control.ZoomSlider(),
+      new ol.control.ScaleLine({
+        target: 'scale-line',
+        units: 'metric'
+      })
+    ])
   });
+
+  map.getControls().forEach(function (control) {
+    if (control instanceof ol.control.ZoomSlider) {
+      control.setTarget(document.getElementById('map-container'));
+    }
+  });
+
+  // 스타일 변경 함수
+  function changeMapStyle(style) {
+    currentMapStyle = style;
+
+    // 모든 레이어 숨기기
+    for (let key in mapStyles) {
+      mapStyles[key].setVisible(false);
+    }
+
+    // 선택된 스타일 레이어 보이기
+    mapStyles[style].setVisible(true);
+  }
+
 </script>
 </body>
+
 </html>

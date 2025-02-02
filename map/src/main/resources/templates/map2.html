@@ -1,302 +1,1374 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GeoServer WMS with OpenLayers</title>
-  <link rel="stylesheet" th:href="@{/css/ol.css}"/>
-  <script type="text/javascript" th:src="@{/js/ol.js}"></script>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <script>
+    L_NO_TOUCH = false;
+    L_DISABLE_3D = false;
+  </script>
+  <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+  <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+  <link rel="stylesheet" href="/css/mapOptionLayer.css">
+  <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <style>
+    #map_b019f3d2eac06e0c4f701347db1f79d1 {
+      position: relative;
+      width: 100.0%;
+      height: 950px;
+      left: 0.0%;
+      top: 0.0%;
+    }
+    .leaflet-container { font-size: 1rem; }
+  </style>
+
 </head>
 <body>
-<div id="map" style="width: 100%; height: 800px;"></div>
-<div id="map_text"></div>
-<div id="subway"></div>
-<div id="map_position"></div>
-<div id="population_text"></div>
+<!--<div class="folium-map" id="map_b019f3d2eac06e0c4f701347db1f79d1" ></div>-->
+<div class="ft">
+  <div class="main-map">
+    <div id="map_b019f3d2eac06e0c4f701347db1f79d1" class="folium-map">
+      <div class="menu" id="menu">
+        <div class="menu-header">
+          <h1 class="brand-title">
+            <a href="/static" style="padding-left: 10px; text-decoration: none; color: black" class="text-decoration-none">Urban Nexus</a> <!-- 메인 페이지 링크 -->
+          </h1>
+          <!--          <span>레이어 선택</span>-->
+          <button onclick="toggleMenu()"><img src="/images/left.svg" style="width: 20px; height: 20px"></button> <!-- 닫기 버튼 -->
+        </div>
+        <div>
+          <button id="btn-gwangju">광주</button>
+          <button id="btn-cheonan">천안</button>
+        </div>
+        <div class="menu-search">
+          <input class="layer-search" id="layer-search" type="text" placeholder="검색..."> <!-- 검색창 -->
+          <ul class="search-list" id="search-list"></ul>
+        </div>
+        <div class="menu-category">
+          <h1>카테고리</h1>
+          <div class="category-button" id="category-button">
+            <button id="category-all"><img src="/images/all.svg"></button>
+            <button id="category-library"><img src="/images/book.svg"></button>
+            <button id="category-wifi"><img src="/images/wifi.svg"></button>
+            <button id="category-issuingMachine"><img src="/images/print.svg"></button>
+            <button id="category-shade"><img src="/images/shade.svg"></button>
+          </div>
+        </div>
+        <ul class="submenu-list" id="submenu-list">
+          <li>
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">수치지도</span> <!-- 메인 메뉴 -->
+            <ul class="submenu"> <!-- 서브메뉴 리스트 -->
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">건물</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">건물</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">가건물</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14118">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">공장</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14311">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">구청</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14216">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">군청</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14215">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">면사무소</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14219">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">무벽건물</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14116">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">법원</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14221">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">세무서</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14233">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">시장경계</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14324">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">시청</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14214">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">아파트</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14115">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">연립주택</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14113">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">온실</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14117">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">우체국</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14235">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">읍사무소</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14217">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">일반병원</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14611">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">주민센터</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14218">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">주택</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14112">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">주택외건물</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14111">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">창고</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14524">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">파출소</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14224">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">학교</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14411">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">호텔</span>
+                        <input type="checkbox" id="gwangju_digital_B00_14511">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">담장</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">담장(미분류)</span>
+                        <input type="checkbox" id="gwangju_digital_B00_24120">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">문주</span>
+                        <input type="checkbox" id="gwangju_digital_B00_24127">
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">경계</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">행정경계</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">구계</span>
+                        <input type="checkbox" id="gwangju_digital_G00_18115">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">군계</span>
+                        <input type="checkbox" id="gwangju_digital_G00_18114">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">동계</span>
+                        <input type="checkbox" id="gwangju_digital_G00_18117">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">시계</span>
+                        <input type="checkbox" id="gwangju_digital_G00_18113">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">읍계</span>
+                        <input type="checkbox" id="gwangju_digital_G00_18116">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">특별시,광역시,도</span>
+                        <input type="checkbox" id="gwangju_digital_G00_18112">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">수부지형경계</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">모래</span>
+                        <input type="checkbox" id="gwangju_digital_G00_22312">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">모래기호</span>
+                        <input type="checkbox" id="gwangju_digital_G00_22322">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">습지</span>
+                        <input type="checkbox" id="gwangju_digital_G00_22313">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">습지기호</span>
+                        <input type="checkbox" id="gwangju_digital_G00_22323">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">기타경계</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">(산업지역경계)미분류</span>
+                        <input type="checkbox" id="gwangju_digital_G00_38210">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">관광단지</span>
+                        <input type="checkbox" id="gwangju_digital_G00_38232">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">너덜바위</span>
+                        <input type="checkbox" id="gwangju_digital_G00_37214">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">문화제보호구역</span>
+                        <input type="checkbox" id="gwangju_digital_G00_38231">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">벼랑바위</span>
+                        <input type="checkbox" id="gwangju_digital_G00_37213">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">위락단지</span>
+                        <input type="checkbox" id="gwangju_digital_G00_38233">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">축산단지</span>
+                        <input type="checkbox" id="gwangju_digital_G00_38214">
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">도로</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">도로경계</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)고속도로</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13111">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)군도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13116">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)면리간도로</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13117">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)시도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13115">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)일반국도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13112">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)지방도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13113">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(기본도로)특별시도,광역시도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13114">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(도로번호-기호)고속국도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13431">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(도로번호-기호)일반국도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13432">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(도로번호-기호)지방도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13433">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">부지안도로</span>
+                        <input type="checkbox" id="gwangju_digital_A00_13118">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">도로중심선</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">고속도로</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23211">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">군도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23216">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">면리간도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23217">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">소로</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23119">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">시도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23215">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">일반국도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23212">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">지방도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23213">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">특별시도,광역시도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_23214">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">인도</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">인도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_33324">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">자전거도로</span>
+                        <input type="checkbox" id="gwangju_digital_A00_33327">
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">횡단보도</span>
+                    <input type="checkbox" id="gwangju_digital_A00_43325">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">안전지대</span>
+                    <input type="checkbox" id="gwangju_digital_A00_53326">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">육교</span>
+                    <input type="checkbox" id="gwangju_digital_A00_63321">
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">교량</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">다리</span>
+                        <input type="checkbox" id="gwangju_digital_A00_73340">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">철교</span>
+                        <input type="checkbox" id="gwangju_digital_A00_71210">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">입체교차부</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">고가차도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_93351">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">지하차도</span>
+                        <input type="checkbox" id="gwangju_digital_A00_93352">
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">수계</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">하천중심선</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">세류</span>
+                        <input type="checkbox" id="gwangju_digital_E00_22112">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">하천중심선</span>
+                        <input type="checkbox" id="gwangju_digital_E00_22115">
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">실폭하천</span>
+                    <input type="checkbox" id="gwangju_digital_E00_32111">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">유수방향</span>
+                    <input type="checkbox" id="gwangju_digital_E00_42326">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">호수,저수지</span>
+                    <input type="checkbox" id="gwangju_digital_E00_52114">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">용수로</span>
+                    <input type="checkbox" id="gwangju_digital_E00_62273">
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">시설</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li class="check-item">
+                    <span class="submenu-item">선착장</span>
+                    <input type="checkbox" id="gwangju_digital_C00_32254">
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">제방</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">콘크리트방조제(상단)</span>
+                        <input type="checkbox" id="gwangju_digital_C00_52221">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">콘크리트제방(상단)</span>
+                        <input type="checkbox" id="gwangju_digital_C00_52211">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">콘크리트제방(하단)</span>
+                        <input type="checkbox" id="gwangju_digital_C00_52212">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">수문</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">배수갑문</span>
+                        <input type="checkbox" id="gwangju_digital_C00_62242">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">보</span>
+                        <input type="checkbox" id="gwangju_digital_C00_62243">
+                      </li>
 
-<!-- 체크박스 추가 -->
-<div>
-  <label for="wmsLayerCheckbox">WMS Layer 표시:</label>
-  <input type="checkbox" id="wmsLayerCheckbox">
+                      <li class="check-item">
+                        <span class="submenu-item">수문</span>
+                        <input type="checkbox" id="gwangju_digital_C00_62241">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">암거</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">암거</span>
+                        <input type="checkbox" id="gwangju_digital_C00_76116">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">측구</span>
+                        <input type="checkbox" id="gwangju_digital_C00_76117">
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">우물</span>
+                    <input type="checkbox" id="gwangju_digital_C00_96311">
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">식생</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">경지계</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">과수원</span>
+                        <input type="checkbox" id="gwangju_digital_D00_15213">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">논</span>
+                        <input type="checkbox" id="gwangju_digital_D00_15211">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">밭</span>
+                        <input type="checkbox" id="gwangju_digital_D00_15212">
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">지류계</span>
+                    <input type="checkbox" id="gwangju_digital_D00_25111">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">목장</span>
+                    <input type="checkbox" id="gwangju_digital_D00_45214">
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">주기</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li class="check-item">
+                    <span class="submenu-item">도곽</span>
+                    <input type="checkbox" id="gwangju_digital_H00_17334">
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">기준점</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">삼각점</span>
+                        <input type="checkbox" id="gwangju_digital_H00_27311">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">수준점</span>
+                        <input type="checkbox" id="gwangju_digital_H00_27312">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">통합기준점</span>
+                        <input type="checkbox" id="gwangju_digital_H00_27313">
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">지형</span>
+                <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">등고선</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">(볼록지)계곡선</span>
+                        <input type="checkbox" id="gwangju_digital_F00_17114">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(볼록지)주곡선</span>
+                        <input type="checkbox" id="gwangju_digital_F00_17111">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(오목지)계곡선</span>
+                        <input type="checkbox" id="gwangju_digital_F00_17124">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">(오목지)주곡선</span>
+                        <input type="checkbox" id="gwangju_digital_F00_17121">
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">표고점</span>
+                    <input type="checkbox" id="gwangju_digital_F00_27217">
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">성,절토</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">성토(상단)</span>
+                        <input type="checkbox" id="gwangju_digital_F00_37221">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">성토(하단)</span>
+                        <input type="checkbox" id="gwangju_digital_F00_37223">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">절토(상단)</span>
+                        <input type="checkbox" id="gwangju_digital_F00_37222">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span class="submenu-item" onclick="toggleSubmenu(event, this)">옹벽</span>
+                    <ul class="submenu"> <!-- 드롭다운 내부의 드롭다운 -->
+                      <li class="check-item">
+                        <span class="submenu-item">콘크리트옹벽(상단)</span>
+                        <input type="checkbox" id="gwangju_digital_F00_47224">
+                      </li>
+                      <li class="check-item">
+                        <span class="submenu-item">콘크리트옹벽(하단)</span>
+                        <input type="checkbox" id="gwangju_digital_F00_47225">
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">인구</span>
+            <ul class="submenu">
+              <li class="check-item">
+                <span class="submenu-item">모든 연령대</span>
+                <input type="checkbox" id="gwangju_population_all">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">초등학생</span>
+                <input type="checkbox" id="gwangju_population_10c">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">중학생</span>
+                <input type="checkbox" id="gwangju_population_10j">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">고등학생</span>
+                <input type="checkbox" id="gwangju_population_10g">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">20대</span>
+                <input type="checkbox" id="gwangju_population_20y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">30대</span>
+                <input type="checkbox" id="gwangju_population_30y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">40대</span>
+                <input type="checkbox" id="gwangju_population_40y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">50대</span>
+                <input type="checkbox" id="gwangju_population_50y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">60대</span>
+                <input type="checkbox" id="gwangju_population_60y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">70대</span>
+                <input type="checkbox" id="gwangju_population_70y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">80대</span>
+                <input type="checkbox" id="gwangju_population_80y">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">90대</span>
+                <input type="checkbox" id="gwangju_population_90y">
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">기본 레이어</span>
+            <ul class="submenu">
+              <li class="check-item">
+                <span class="submenu-item">광주 동</span>
+                <input type="checkbox" id="gwangju_dong">
+              </li>
+              <li class="check-item">
+                <span class="submenu-item">광주 구</span>
+                <input type="checkbox" id="gwangju_gu">
+              </li>
+            </ul>
+          </li>
+          <li id="library">
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">도서관</span>
+            <ul class="submenu">
+              <li class="check-item">
+                <span class="submenu-item">도서관</span>
+                <input type="checkbox" id="gwangju_library">
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">민원발급기</span>
+            <ul class="submenu">
+              <li class="check-item">
+                <span class="submenu-item">민원발급기</span>
+                <input type="checkbox" id="gwangju_civil_service_machines">
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">토지</span>
+            <ul class="submenu">
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">소유정보</span>
+                <ul class="submenu">
+                  <li class="check-item">
+                    <span class="submenu-item">일본인, 창씨명등</span>
+                    <input type="checkbox" id="gwangju_toji_owner_00">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">개인</span>
+                    <input type="checkbox" id="gwangju_toji_owner_01">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">국유지</span>
+                    <input type="checkbox" id="gwangju_toji_owner_02">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">외국인, 외국공공기관</span>
+                    <input type="checkbox" id="gwangju_toji_owner_03">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">시, 도유지</span>
+                    <input type="checkbox" id="gwangju_toji_owner_04">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">군유지</span>
+                    <input type="checkbox" id="gwangju_toji_owner_05">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">법인</span>
+                    <input type="checkbox" id="gwangju_toji_owner_06">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">종증</span>
+                    <input type="checkbox" id="gwangju_toji_owner_07">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">종교단체</span>
+                    <input type="checkbox" id="gwangju_toji_owner_08">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">기타</span>
+                    <input type="checkbox" id="gwangju_toji_owner_09">
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="submenu-item" onclick="toggleSubmenu(event, this)">이용현황</span>
+                <ul class="submenu">
+                  <li class="check-item">
+                    <span class="submenu-item">경지정리답</span>
+                    <input type="checkbox" id="gwangju_toji_use_1110">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">미경지정리답</span>
+                    <input type="checkbox" id="gwangju_toji_use_1120">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">보통, 특수작물</span>
+                    <input type="checkbox" id="gwangju_toji_use_1210">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">과수원 기타</span>
+                    <input type="checkbox" id="gwangju_toji_use_1220">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">자연초지</span>
+                    <input type="checkbox" id="gwangju_toji_use_2110">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">인공초지</span>
+                    <input type="checkbox" id="gwangju_toji_use_2120">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">침엽수림</span>
+                    <input type="checkbox" id="gwangju_toji_use_2210">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">활엽수림</span>
+                    <input type="checkbox" id="gwangju_toji_use_2220">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">혼합수림</span>
+                    <input type="checkbox" id="gwangju_toji_use_2230">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">골프장</span>
+                    <input type="checkbox" id="gwangju_toji_use_2310">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">공원묘지</span>
+                    <input type="checkbox" id="gwangju_toji_use_2320">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">유원지</span>
+                    <input type="checkbox" id="gwangju_toji_use_2330">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">일반주택지</span>
+                    <input type="checkbox" id="gwangju_toji_use_3110">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">고층주택지</span>
+                    <input type="checkbox" id="gwangju_toji_use_3120">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">상업, 업무지</span>
+                    <input type="checkbox" id="gwangju_toji_use_3130">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">나대지 및 인공녹지</span>
+                    <input type="checkbox" id="gwangju_toji_use_3140">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">도로</span>
+                    <input type="checkbox" id="gwangju_toji_use_3210">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">철로 및 주변지역</span>
+                    <input type="checkbox" id="gwangju_toji_use_3220">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">공항</span>
+                    <input type="checkbox" id="gwangju_toji_use_3230">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">공업시설</span>
+                    <input type="checkbox" id="gwangju_toji_use_3310">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">공업나지, 기타</span>
+                    <input type="checkbox" id="gwangju_toji_use_3320">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">발전시설</span>
+                    <input type="checkbox" id="gwangju_toji_use_3410">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">처리장</span>
+                    <input type="checkbox" id="gwangju_toji_use_3420">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">교육, 군사시설</span>
+                    <input type="checkbox" id="gwangju_toji_use_3430">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">공공용지</span>
+                    <input type="checkbox" id="gwangju_toji_use_3440">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">양어장, 양식장</span>
+                    <input type="checkbox" id="gwangju_toji_use_3510">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">채광지역</span>
+                    <input type="checkbox" id="gwangju_toji_use_3520">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">매립지</span>
+                    <input type="checkbox" id="gwangju_toji_use_3530">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">가축사육시설</span>
+                    <input type="checkbox" id="gwangju_toji_use_3550">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">하천</span>
+                    <input type="checkbox" id="gwangju_toji_use_4210">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">호, 소</span>
+                    <input type="checkbox" id="gwangju_toji_use_4310">
+                  </li>
+                  <li class="check-item">
+                    <span class="submenu-item">댐</span>
+                    <input type="checkbox" id="gwangju_toji_use_4320">
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="submenu-list2" id="submenu-list2">
+          <li>
+            <span class="submenu-item" onclick="toggleSubmenu(event, this)">천안 구</span>
+            <ul class="submenu">
+              <li class="check-item">
+                <span class="submenu-item">천안 구</span>
+                <input type="checkbox" id="cheonan_si">
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="check-layer" id="check-layer">
+        <!-- 레이어 헤더 -->
+        <div class="layer-header" id="layer-header">
+          <span>레이어 리스트</span> <!-- 제목 -->
+          <button class="cancel-button" id="layer-cancel"><img class="cancel-image" src="/images/icons8-취소.svg"></button>
+        </div>
+        <div class="layer-content">
+          <!-- 드래그 가능한 체크박스 리스트 -->
+          <ul class="draggable-checkbox-list" id="draggable-checkbox-list">
+            <!--            <li draggable="true" id="cancel-layer"><img src="/images/icons8-메뉴.svg" style="width: 20px; height: 20px"><label for="option3">공공와이파이</label><button class="cancel-layer" id="cancel-layer"><img src="/images/icons8-취소.svg" style="width: 20px; height: 20px"></button>-->
+            <!--            <li draggable="true"><img src="/images/icons8-메뉴.svg" style="width: 20px; height: 20px"><label for="option4">무더위 그늘막</label><button class="cancel-layer" id="cancel-layer"><img src="/images/icons8-취소.svg" style="width: 20px; height: 20px"></button>-->
+          </ul>
+        </div>
+      </div>
+      <div class="overlay-button-container">
+        <button id="fullscreenButton"><img src="/images/전체화면.svg" style="width: 20px; height: 20px"></button>
+        <button id="layer-invisible"><img src="/images/layer.svg" style="width: 20px; height: 20px"></button>
+      </div>
+      <button class="menu-button hidden" id="menu-button" onclick="toggleMenu()"><img src="/images/right.svg" style="width: 20px; height: 20px"></button>
+    </div>
+  </div>
 </div>
+</body>
+<script th:src="@{/js/test.js}"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // OpenLayers Map 객체 생성
-    var map = new ol.Map({
-      target: 'map', // map div에 지도 표시
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()  // OpenStreetMap 배경 지도
-        }), // 0번
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:busan',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 부산
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:chungcheongbuk-do',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }),// 경북
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:chungcheongnam-do',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 경남
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:daegu',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 대구
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:daejeon',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 대전
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:gangwon',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 강원도
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:gwangju',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 광주
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:gyeonggi-do',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 경기도
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:gyeongsangbuk-do',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 경상북도
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:gyeongsangnam-do',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 경상남도
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:incheon',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 인천
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:jeju',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 제주
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:jeollanam-do',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 전남
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:jeonbuk',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 전북
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:ulsan',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 울산
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:seoul',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }), // 서울
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://localhost:8080/geoserver/ne/wms',  // GeoServer WMS URL
-            params: {
-              'LAYERS': 'ne:sejong-si',  // 사용하려는 레이어 이름
-              'TILED': true,
-              'FORMAT': 'image/png',
-              'SRS': 'EPSG:4326'  // 좌표계 설정
-            },
-            serverType: 'geoserver'
-          }),
-          visible: false  // 기본적으로 WMS 레이어가 보이지 않도록 설정
-        }) // 세종시
-      ],
-      view: new ol.View({
-        projection: 'EPSG:4326',  // 지도 좌표계 설정
-        center: [126.978, 37.566],  // 서울의 경도, 위도 좌표
-        zoom: 11,  // 기본 줌 레벨
-        minZoom: 1, // 최소 줌 레벨 설정
-        maxZoom: 20, // 최대 줌 레벨 설정
-      })
-    });
+  L_NO_TOUCH = false;
+  L_DISABLE_3D = false;
 
-    // 체크박스를 클릭할 때 레이어의 가시성 토글
-    var wmsLayerCheckbox = document.getElementById('wmsLayerCheckbox');
-    wmsLayerCheckbox.addEventListener('change', function() {
-      for (let i = 1; i < 18; i++){ // let을 사용하여 반복 변수 선언
-        var wmsLayer = map.getLayers().item(i); // WMS 레이어
-        wmsLayer.setVisible(wmsLayerCheckbox.checked);  // 체크된 상태에 따라 레이어 표시/숨기기
-      }
-    });
+  const draggableList = document.getElementById('draggable-checkbox-list'); // 드래그 가능한 리스트 요소 가져오기
+  let draggedItem = null; // 드래그 중인 항목
+  let placeholder = null; // 플레이스홀더 요소
+  let layer_list = [];
+  const categoryButton = document.querySelectorAll('#category-button button');
+  const submenuList = document.querySelectorAll('#submenu-list li');
 
-    // 지도 클릭시
-    map.on('click', function (event) {
-      var coordinate = event.coordinate;
-      var view = map.getView();
-      var resolution = view.getResolution();
-      var projection = view.getProjection();
-
-      // 클릭한 위치 좌표
-      var lonLatText = '클릭한 위치의 위도 : ' +  coordinate[1].toFixed(6) + ', 경도 : ' + coordinate[0].toFixed(6); // 위도, 경도
-      let coordinateText = document.getElementById("map_position");
-      coordinateText.textContent = lonLatText;
-
-      // 클릭한 위치 이름
-      var url1 = map.getLayers().item(1).getSource().getGetFeatureInfoUrl(coordinate, resolution, projection, {
-        'INFO_FORMAT': 'application/json'
-      });
-      if (url1) {
-        fetch(url1)
-                .then(response => response.json())
-                .then(data => {
-                  const name = data.features[0].properties.name;
-                  let text = document.getElementById("map_text");
-                  text.textContent = '현재 클릭한 곳은 ' + name + ' 입니다.';
-                })
-                .catch(error => console.error('Error fetching feature info:', error));
+  // 각 버튼에 클릭 이벤트 추가
+  categoryButton.forEach((button) => {
+    button.addEventListener('click', () => {
+      const category = button.id.replace('category-', '');
+      if (category === 'all') {
+        // "전체" 버튼 클릭 시 모든 li 표시
+        submenuList.forEach((li) => li.classList.remove('hidden'));
+      } else {
+        // 모든 li 숨기기
+        submenuList.forEach((li) => {
+          if (li.id === category) {
+            li.classList.remove('hidden'); // 선택된 카테고리는 표시
+          } else {
+            li.classList.add('hidden'); // 나머지는 숨기기
+          }
+        });
       }
     });
   });
+  // 드래그 앤 드롭 이벤트 처리
+  draggableList.addEventListener('dragstart', (e) => {
+    if (e.target.tagName === 'LI') { // 드래그가 LI 요소에서 시작될 때만 실행
+      draggedItem = e.target; // 드래그 중인 항목 저장
+      draggedItem.classList.add('dragging'); // 드래그 중인 항목에 스타일 추가
+      placeholder = document.createElement('li'); // 플레이스홀더 생성
+      placeholder.className = 'placeholder'; // 플레이스홀더 스타일 클래스 추가
+      e.target.parentNode.insertBefore(placeholder, e.target.nextSibling); // 플레이스홀더를 드래그 항목 아래에 추가
+    }
+  });
+  draggableList.addEventListener('dragover', (e) => {
+    e.preventDefault(); // 기본 동작 방지
+    const draggingOverItem = e.target.closest('li'); // 드래그 중인 항목 탐지
+    if (draggingOverItem && draggingOverItem !== placeholder && draggingOverItem !== draggedItem) { // 유효한 항목일 경우
+      const bounding = draggingOverItem.getBoundingClientRect(); // 항목의 위치 정보 가져오기
+      const offset = e.clientY - bounding.top; // 마우스 위치 계산
+      if (offset > bounding.height / 2) { // 마우스가 항목의 하단에 위치한 경우
+        draggingOverItem.after(placeholder); // 플레이스홀더를 항목 뒤로 이동
+      } else { // 상단에 위치한 경우
+        draggingOverItem.before(placeholder); // 플레이스홀더를 항목 앞으로 이동
+      }
+    }
+  });
 
+  const layer_invisible = document.getElementById('layer-invisible');
+  const check_layer = document.getElementById('check-layer');
+  const layer_cancel = document.getElementById('layer-cancel');
+
+  layer_cancel.addEventListener('click', ()=>{
+    if (check_layer.style.display === 'block' || check_layer.style.display === '') {
+      check_layer.style.display = 'none';
+    }
+  });
+  layer_invisible.addEventListener('click', () => {
+    if (check_layer.style.display === 'block' || check_layer.style.display === '') {
+      check_layer.style.display = 'none'; // 안 보이게 설정
+    }
+    else if (check_layer.style.display === 'none') {
+      check_layer.style.display = 'block'; // 보이게 설정
+
+    }
+  });
+  const layer_names = [
+    { name: '광주 동', id: 'gwangju_dong' },
+    { name: '광주 구', id: 'gwangju_gu' },
+    { name: '초등학생', id: 'gwangju_population_10c' },
+    { name: '중학생', id: 'gwangju_population_10j' },
+    { name: '고등학생', id: 'gwangju_population_10g' },
+    { name: '20대', id: 'gwangju_population_20y' },
+    { name: '30대', id: 'gwangju_population_30y' },
+    { name: '40대', id: 'gwangju_population_40y' },
+    { name: '50대', id: 'gwangju_population_50y' },
+    { name: '60대', id: 'gwangju_population_60y' },
+    { name: '70대', id: 'gwangju_population_70y' },
+    { name: '80대', id: 'gwangju_population_80y' },
+    { name: '90대', id: 'gwangju_population_90y' },
+    { name: '모든 연령대', id: 'gwangju_population_all' },
+    { name: '경지정리답', id: 'gwangju_toji_use_1110' },
+    { name: '미경지정리답', id: 'gwangju_toji_use_1120' },
+    { name: '보통,특수작물', id: 'gwangju_toji_use_1210' },
+    { name: '과수원 기타', id: 'gwangju_toji_use_1220' },
+    { name: '자연초지', id: 'gwangju_toji_use_2110' },
+    { name: '인공초지', id: 'gwangju_toji_use_2120' },
+    { name: '침엽수림', id: 'gwangju_toji_use_2210' },
+    { name: '활엽수림', id: 'gwangju_toji_use_2220' },
+    { name: '혼합수림', id: 'gwangju_toji_use_2230' },
+    { name: '골프장', id: 'gwangju_toji_use_2310' },
+    { name: '공원묘지', id: 'gwangju_toji_use_2320' },
+    { name: '유원지', id: 'gwangju_toji_use_2330' },
+    { name: '일반주택지', id: 'gwangju_toji_use_3110' },
+    { name: '고층주택지', id: 'gwangju_toji_use_3120' },
+    { name: '상업,업무지', id: 'gwangju_toji_use_3130' },
+    { name: '나대지 및 인공녹지', id: 'gwangju_toji_use_3140' },
+    { name: '도로', id: 'gwangju_toji_use_3210' },
+    { name: '철로 및 주변지역', id: 'gwangju_toji_use_3220' },
+    { name: '공항', id: 'gwangju_toji_use_3230' },
+    { name: '공업시설', id: 'gwangju_toji_use_3310' },
+    { name: '공업나지, 기타', id: 'gwangju_toji_use_3320' },
+    { name: '발전시설', id: 'gwangju_toji_use_3410' },
+    { name: '처리장', id: 'gwangju_toji_use_3420' },
+    { name: '교육, 군사시설', id: 'gwangju_toji_use_3430' },
+    { name: '공공용지', id: 'gwangju_toji_use_3440' },
+    { name: '양어장, 양식장', id: 'gwangju_toji_use_3510' },
+    { name: '채광지역', id: 'gwangju_toji_use_3520' },
+    { name: '매립지', id: 'gwangju_toji_use_3530' },
+    { name: '가축사육시설', id: 'gwangju_toji_use_3550' },
+    { name: '하천', id: 'gwangju_toji_use_4210' },
+    { name: '호, 소', id: 'gwangju_toji_use_4310' },
+    { name: '댐', id: 'gwangju_toji_use_4320' },
+    { name: '일본인, 창씨명등', id: 'gwangju_toji_owner_00' },
+    { name: '개인', id: 'gwangju_toji_owner_01' },
+    { name: '국유지', id: 'gwangju_toji_owner_02' },
+    { name: '외국인, 외국공공기관', id: 'gwangju_toji_owner_03' },
+    { name: '시, 도유지', id: 'gwangju_toji_owner_04' },
+    { name: '군유지', id: 'gwangju_toji_owner_05' },
+    { name: '법인', id: 'gwangju_toji_owner_06' },
+    { name: '종증', id: 'gwangju_toji_owner_07' },
+    { name: '종교단체', id: 'gwangju_toji_owner_08' },
+    { name: '기타', id: 'gwangju_toji_owner_09' },
+    { name: '도서관', id: 'gwangju_library' },
+    { name: '민원발급기', id: 'gwangju_civil_service_machines' },
+    { name: '천안 구', id: 'cheonan_si'}
+  ];
+  // 레이어의 인덱스와 체크박스의 ID를 배열로 정의
+  const layers = [
+    { id: 'gwangju_dong', layerIndex: 1 },
+    { id: 'gwangju_gu', layerIndex: 2 },
+    { id: 'gwangju_population_10c', layerIndex: 3 },
+    { id: 'gwangju_population_10j', layerIndex: 4 },
+    { id: 'gwangju_population_10g', layerIndex: 5 },
+    { id: 'gwangju_population_20y', layerIndex: 6 },
+    { id: 'gwangju_population_30y', layerIndex: 7 },
+    { id: 'gwangju_population_40y', layerIndex: 8 },
+    { id: 'gwangju_population_50y', layerIndex: 9 },
+    { id: 'gwangju_population_60y', layerIndex: 10 },
+    { id: 'gwangju_population_70y', layerIndex: 11 },
+    { id: 'gwangju_population_80y', layerIndex: 12 },
+    { id: 'gwangju_population_90y', layerIndex: 13 },
+    { id: 'gwangju_population_all', layerIndex: 14 },
+    { id: 'gwangju_toji_use_1110', layerIndex: 15 },
+    { id: 'gwangju_toji_use_1120', layerIndex: 16 },
+    { id: 'gwangju_toji_use_1210', layerIndex: 17 },
+    { id: 'gwangju_toji_use_1220', layerIndex: 18 },
+    { id: 'gwangju_toji_use_2110', layerIndex: 19 },
+    { id: 'gwangju_toji_use_2120', layerIndex: 20 },
+    { id: 'gwangju_toji_use_2210', layerIndex: 21 },
+    { id: 'gwangju_toji_use_2220', layerIndex: 22 },
+    { id: 'gwangju_toji_use_2230', layerIndex: 23 },
+    { id: 'gwangju_toji_use_2310', layerIndex: 24 },
+    { id: 'gwangju_toji_use_2320', layerIndex: 25 },
+    { id: 'gwangju_toji_use_2330', layerIndex: 26 },
+    { id: 'gwangju_toji_use_3110', layerIndex: 27 },
+    { id: 'gwangju_toji_use_3120', layerIndex: 28 },
+    { id: 'gwangju_toji_use_3130', layerIndex: 29 },
+    { id: 'gwangju_toji_use_3140', layerIndex: 30 },
+    { id: 'gwangju_toji_use_3210', layerIndex: 31 },
+    { id: 'gwangju_toji_use_3220', layerIndex: 32 },
+    { id: 'gwangju_toji_use_3230', layerIndex: 33 },
+    { id: 'gwangju_toji_use_3310', layerIndex: 34 },
+    { id: 'gwangju_toji_use_3320', layerIndex: 35 },
+    { id: 'gwangju_toji_use_3410', layerIndex: 36 },
+    { id: 'gwangju_toji_use_3420', layerIndex: 37 },
+    { id: 'gwangju_toji_use_3430', layerIndex: 38 },
+    { id: 'gwangju_toji_use_3440', layerIndex: 39 },
+    { id: 'gwangju_toji_use_3510', layerIndex: 40 },
+    { id: 'gwangju_toji_use_3520', layerIndex: 41 },
+    { id: 'gwangju_toji_use_3530', layerIndex: 42 },
+    { id: 'gwangju_toji_use_3550', layerIndex: 43 },
+    { id: 'gwangju_toji_use_4210', layerIndex: 44 },
+    { id: 'gwangju_toji_use_4310', layerIndex: 45 },
+    { id: 'gwangju_toji_use_4320', layerIndex: 46 },
+    { id: 'gwangju_toji_owner_00', layerIndex: 47 },
+    { id: 'gwangju_toji_owner_01', layerIndex: 48 },
+    { id: 'gwangju_toji_owner_02', layerIndex: 49 },
+    { id: 'gwangju_toji_owner_03', layerIndex: 50 },
+    { id: 'gwangju_toji_owner_04', layerIndex: 51 },
+    { id: 'gwangju_toji_owner_05', layerIndex: 52 },
+    { id: 'gwangju_toji_owner_06', layerIndex: 53 },
+    { id: 'gwangju_toji_owner_07', layerIndex: 54 },
+    { id: 'gwangju_toji_owner_08', layerIndex: 55 },
+    { id: 'gwangju_toji_owner_09', layerIndex: 56 },
+    { id: 'gwangju_library', layerIndex: 57 },
+    { id: 'gwangju_civil_service_machines', layerIndex: 58 },
+    { id: 'cheonan_si', layerIndex: 59}
+  ];
+
+  const regions = {
+    gwangju: { center: [35.1595, 126.8526], zoom: 11 },  // 광주의 중심 좌표 및 줌 레벨
+    cheonan: { center: [36.8154, 127.1523], zoom: 12 }   // 천안의 중심 좌표 및 줌 레벨
+  };
+  // 광주 메뉴 보이기
+  document.getElementById('submenu-list').style.display = 'block';
+  // 천안 메뉴 숨기기
+  document.getElementById('submenu-list2').style.display = 'none';
+  // 광주 버튼 클릭 시
+  document.getElementById('btn-gwangju').addEventListener('click', function() {
+    // 광주 중심으로 이동하고 줌 레벨 설정
+    map.setView(regions.gwangju.center, regions.gwangju.zoom);
+
+    // 광주 메뉴 보이기
+    document.getElementById('submenu-list').style.display = 'block';
+
+    // 천안 메뉴 숨기기
+    document.getElementById('submenu-list2').style.display = 'none';
+  });
+  // 천안 버튼 클릭 시
+  document.getElementById('btn-cheonan').addEventListener('click', function() {
+    // 천안 중심으로 이동하고 줌 레벨 설정
+    map.setView(regions.cheonan.center, regions.cheonan.zoom);
+
+    // 천안 메뉴 보이기
+    document.getElementById('submenu-list2').style.display = 'block';
+
+    // 광주 메뉴 숨기기
+    document.getElementById('submenu-list').style.display = 'none';
+  });
+
+  var map = map_b019f3d2eac06e0c4f701347db1f79d1;
+
+  // WMS 레이어 추가 함수
+  function createWmsLayer(layerId) {
+    return L.tileLayer.wms('http://localhost:8080/geoserver/ne/wms', {
+      layers: `ne:${layerId}`,  // 'ne:' 접두사 추가
+      format: 'image/png',
+      transparent: true,
+      attribution: '&copy; GeoServer Contributors'
+    });
+  }
+
+  // 레이어 배열을 돌면서 WMS 레이어 생성
+  const layerInstances = {};  // 레이어 인스턴스를 저장할 객체
+  console.log(layerInstances);
+
+  // 레이어 추가 삭제
+  layers.forEach(function(layerInfo) {
+    const wmsLayer = createWmsLayer(layerInfo.id);
+    layerInstances[layerInfo.id] = wmsLayer;  // WMS 레이어를 객체에 저장
+
+    // 체크박스에 이벤트 리스너 추가
+    var checkbox = document.getElementById(layerInfo.id);  // 왼쪽 체크박스를 찾음
+    var rightCheckbox = document.getElementById('search-' + layerInfo.id);  // 오른쪽 체크박스 찾기
+
+    checkbox.addEventListener('change', function(event) {
+      if (event.target.checked) {
+        map.addLayer(wmsLayer);  // Leaflet에서 레이어를 추가하는 방법
+        // 레이어 우선순위에 추가
+        const ul = document.getElementById("draggable-checkbox-list");
+        const newLi = document.createElement("li");
+        newLi.setAttribute("draggable", "true");
+        newLi.setAttribute("id", layerInfo.id + '-layer');
+
+        const newBtn = document.createElement("button");
+        newBtn.setAttribute("id", layerInfo.id);
+        newBtn.setAttribute("class", "cancel-layer");
+
+        const newDragImg = document.createElement("img");
+        newDragImg.setAttribute("src", "/images/icons8-메뉴.svg");
+        newDragImg.setAttribute("style", "width: 20px; height: 20px");
+        newDragImg.setAttribute("draggable", "false");
+
+        const newLabel = document.createElement("label");
+        newLabel.setAttribute("for", layerInfo.id + '-label');
+
+        var findName = layer_names.find(layer => layer.id === layerInfo.id);
+        newLabel.textContent = findName.name;
+
+        const newCancelImg = document.createElement("img");
+        newCancelImg.setAttribute("src", "/images/icons8-취소.svg");
+        newCancelImg.setAttribute("style", "width: 20px; height: 20px");
+        newCancelImg.setAttribute("draggable", "false");
+
+        newBtn.appendChild(newCancelImg);
+        newLi.appendChild(newDragImg);
+        newLi.appendChild(newLabel);
+        newLi.appendChild(newBtn);
+        ul.appendChild(newLi);
+        // cancel 버튼 클릭 이벤트 추가
+        newBtn.addEventListener('click', function() {
+          var searchBox = document.getElementById('search-' + layerInfo.id);
+          // li 태그 삭제
+          newLi.remove();
+
+          // 체크박스 해제
+          checkbox.checked = false;
+          if (searchBox !== null) {
+            searchBox.checked = false;
+          }
+
+          // WMS 레이어 제거
+          map.removeLayer(wmsLayer);  // Leaflet에서 지도에서 제거
+        });
+      } else {
+        const div_layer = document.querySelector(`#${layerInfo.id}-layer`);
+        if (div_layer)
+          div_layer.remove();
+        map.removeLayer(wmsLayer);  // Leaflet에서 레이어를 제거하는 방법
+      }
+      // 오른쪽 체크박스 상태 동기화
+      if (rightCheckbox) {
+        rightCheckbox.checked = checkbox.checked;
+      }
+
+
+
+
+    });
+
+    // 오른쪽 체크박스의 상태가 바뀌었을 때 왼쪽 체크박스도 변경
+    if (rightCheckbox) {
+      rightCheckbox.addEventListener('change', function() {
+        if (rightCheckbox.checked) {
+          checkbox.checked = true;  // 왼쪽 체크박스도 체크
+          map.addLayer(wmsLayer);   // Leaflet에서 레이어를 추가
+        } else {
+          checkbox.checked = false; // 왼쪽 체크박스 해제
+          map.removeLayer(wmsLayer); // Leaflet에서 레이어를 제거
+        }
+      });
+    }
+
+    // 초기 상태를 체크박스에 맞춰 설정
+    if (checkbox.checked) {
+      map.addLayer(wmsLayer);  // 초기 상태가 체크되었으면 지도에 추가
+      if (rightCheckbox) {
+        rightCheckbox.checked = true;  // 오른쪽 체크박스도 체크
+      }
+    }
+  });
+
+  draggableList.addEventListener('dragend', () => {
+    if (draggedItem) {  // 드래그 항목이 있을 경우
+      draggedItem.classList.remove('dragging');  // 드래그 중 스타일 제거
+      if (placeholder) {  // 플레이스홀더가 존재할 경우
+        placeholder.parentNode.replaceChild(draggedItem, placeholder);  // 플레이스홀더를 드래그 항목으로 교체
+        placeholder = null;  // 플레이스홀더 제거
+      }
+      draggedItem = null;  // 드래그 항목 초기화
+
+      // 모든 li 요소를 배열로 가져오기
+      const items = Array.from(draggableList.querySelectorAll('li'));
+      layer_list = [];  // 배열 초기화 (이전에 저장된 값들을 제거)
+
+      items.forEach((item, index) => {
+        const label = item.querySelector('label');  // li 안의 label 요소 선택
+        const labelText = label.textContent.trim();  // label 텍스트 가져오기
+        const id = item.id.slice(0, -6);  // ID에서 _layer 부분 제거
+        layer_list.push({ index: 1000 - (index * 50), id: "ne:" + id, labelText: labelText });
+      });
+
+      // 현재 맵에 존재하는 레이어를 순회하면서 id가 일치하는 레이어의 zIndex를 수정
+      map.getLayers().getArray().forEach(layer => {
+        const layerId = layer.get('id');
+        const matchingLayer = layer_list.find(item => item.id === layerId);
+
+        if (matchingLayer) {
+          // 해당 레이어가 layer_list에 존재하면 zIndex 값을 수정
+          layer.setZIndex(matchingLayer.index);
+          console.log(`Layer ${layerId} zIndex updated to ${matchingLayer.index}`);
+        }
+      });
+
+      console.log('layer_list:', layer_list);  // 최종적으로 저장된 배열 출력
+    }
+  });
+
+  // 메뉴 열고 닫기 토글 기능
+  function toggleMenu() {
+    const menu = document.getElementById('menu');
+    const menuButton = document.getElementById('menu-button');
+    menu.classList.toggle('hidden');
+    menuButton.classList.toggle('hidden');
+  }
+
+  // 서브메뉴 열고 닫기 토글 기능
+  function toggleSubmenu(event, element) {
+    event.preventDefault();
+    const listItem = element.parentElement;
+    const submenu = listItem.querySelector('.submenu');
+    if (submenu) {
+      submenu.classList.toggle('active');
+    }
+  }
+  // 검색 입력 필드에 이벤트 리스너 추가
+  document.getElementById('layer-search').addEventListener('input', filterList);
+
+  function filterList() {
+    const keyword = document.getElementById('layer-search').value.trim().toLowerCase();
+    const searchList = document.getElementById('search-list');
+
+    if (keyword === '') {
+      searchList.style.display = 'none'; // 검색어가 없으면 숨기기
+      searchList.innerHTML = ''; // 리스트 초기화
+      return;
+    }
+
+    searchList.style.display = 'block'; // 검색어가 있으면 표시
+    searchList.innerHTML = ''; // 기존 검색 결과 초기화
+
+    // 입력된 키워드와 일치하는 항목 필터링
+    const filteredItems = layer_names.filter(item => item.name.toLowerCase().includes(keyword));
+
+    filteredItems.forEach(item => {
+      const listItem = document.createElement('li');
+      listItem.classList.add('check-item'); // li에 클래스 추가
+
+      const span = document.createElement('span');
+      span.classList.add('submenu-item');
+      span.textContent = item.name; // 레이어 이름 표시
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = item.id;
+      checkbox.id = 'search-' + item.id;
+      checkbox.checked = document.getElementById(item.id)?.checked || false; // 기존 체크박스 상태 동기화
+
+      listItem.appendChild(span);
+      listItem.appendChild(checkbox);
+      searchList.appendChild(listItem);
+
+      // 기존 체크박스와 동기화
+      checkbox.addEventListener('change', function (event) {
+        const originalCheckbox = document.getElementById(item.id);
+        originalCheckbox.checked = event.target.checked; // 원래 체크박스 상태 동기화
+
+        // 기존 이벤트 트리거
+        originalCheckbox.dispatchEvent(new Event('change'));
+      });
+    });
+  }
 </script>
-</body>
+
 </html>
